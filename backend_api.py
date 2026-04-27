@@ -1,9 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from dotenv import load_dotenv
 load_dotenv()
 from main import ToolFactory, StateFactory, Agent, NodeFactory, GraphBuilder, AgentState, set_execution_log
+from pydantic_models import (
+    ToolRequest, StateRequest, AgentRequest, NodeRequest, EdgeRequest,
+    ConditionalEdgeRequest, GraphRequest, EntryRequest, RunRequest, TelegramConnectRequest,
+)
 from langgraph.graph import END
 from langchain_core.messages import HumanMessage, AIMessage
 import threading, requests as http_requests, os, time
@@ -39,53 +42,7 @@ execution_log = []  # list of {node, status, timestamp, graph}
 set_execution_log(execution_log)
 
 
-# --- Request Models ---
-class ToolRequest(BaseModel):
-    name: str
-    description: str
-    tool_type: str = "code"  # "code" or "llm"
-    code: str = ""  # Python expression, used when tool_type="code"
-    prompt_template: str = ""  # Prompt template with {query}, used when tool_type="llm"
 
-
-class StateRequest(BaseModel):
-    fields: dict  # {"field_name": "type_name"} e.g. {"context": "str", "score": "int"}
-
-
-class AgentRequest(BaseModel):
-    name: str
-    description: str
-    tool_names: list[str] = []
-
-
-class NodeRequest(BaseModel):
-    name: str
-    agent_name: str | None = None
-    func_code: str | None = None  # Python expression for a function
-
-
-class EdgeRequest(BaseModel):
-    from_node: str
-    to_node: str
-
-
-class ConditionalEdgeRequest(BaseModel):
-    from_node: str
-    router_code: str  # Python expression for router function
-    destination_map: dict  # {"key": "node_name"}
-
-
-class GraphRequest(BaseModel):
-    name: str
-    state_fields: dict = {}
-
-
-class EntryRequest(BaseModel):
-    node_name: str
-
-
-class RunRequest(BaseModel):
-    user_input: str
 
 
 # --- Tool Endpoints ---
@@ -309,9 +266,6 @@ def telegram_poll_loop(graph_name: str):
         except Exception as e:
             print(f"Telegram poll error: {e}")
             time.sleep(2)
-
-class TelegramConnectRequest(BaseModel):
-    graph_name: str
 
 @app.post("/telegram/connect")
 def telegram_connect(req: TelegramConnectRequest):
