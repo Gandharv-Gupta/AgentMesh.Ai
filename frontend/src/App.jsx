@@ -15,6 +15,7 @@ import Sidebar from "./Sidebar";
 import RunPanel from "./RunPanel";
 import DetailPanel from "./DetailPanel";
 import ToolDetailPanel from "./ToolDetailPanel";
+import ExecutionPanel from "./ExecutionPanel";
 import { api } from "./api";
 import "./App.css";
 
@@ -23,7 +24,8 @@ export default function App() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [graphName, setGraphName] = useState("workflow");
   const [selectedNode, setSelectedNode] = useState(null);
-  const [selectedTool, setSelectedTool] = useState(null); // { toolName, agentName }
+  const [selectedTool, setSelectedTool] = useState(null);
+  const [activeNode, setActiveNode] = useState(null);
 
   const onConnect = useCallback(
     async (params) => {
@@ -83,12 +85,14 @@ export default function App() {
     setSelectedNode(null);
   }, []);
 
-  // Inject onToolClick into all agent nodes
-  const nodesWithHandlers = nodes.map((n) =>
-    n.type === "agentNode"
-      ? { ...n, data: { ...n.data, onToolClick } }
-      : n
-  );
+  // Inject onToolClick + active state into all agent nodes
+  const nodesWithHandlers = nodes.map((n) => {
+    const isActive = activeNode && n.id === activeNode;
+    if (n.type === "agentNode") {
+      return { ...n, data: { ...n.data, onToolClick, isActive }, className: isActive ? "node-active" : "" };
+    }
+    return isActive ? { ...n, className: "node-active" } : n;
+  });
 
   const onNodeClick = useCallback((event, node) => {
     if (node.type === "startNode" || node.type === "endNode") return;
@@ -162,6 +166,7 @@ export default function App() {
           />
         )}
         <RunPanel graphName={graphName} />
+        <ExecutionPanel onActiveNodeChange={setActiveNode} />
       </div>
     </div>
   );

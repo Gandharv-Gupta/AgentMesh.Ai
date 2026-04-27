@@ -41,4 +41,8 @@ export const api = {
   telegramConnect: (graphName) => request("/telegram/connect", "POST", { graph_name: graphName }),
   telegramDisconnect: () => request("/telegram/disconnect", "POST"),
   telegramStatus: () => request("/telegram/status"),
+
+  // Execution Tracking
+  executionStatus: () => request("/execution/status"),
+  executionClear: () => request("/execution/clear", "POST"),
 };

@@ -3,10 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 load_dotenv()
-from main import ToolFactory, StateFactory, Agent, NodeFactory, GraphBuilder, AgentState
+from main import ToolFactory, StateFactory, Agent, NodeFactory, GraphBuilder, AgentState, set_execution_log
 from langgraph.graph import END
 from langchain_core.messages import HumanMessage, AIMessage
 import threading, requests as http_requests, os, time
+from datetime import datetime
 
 app = FastAPI(title="AgentMesh API")
 app.add_middleware(
@@ -34,6 +35,8 @@ tools_meta = {}  # stores raw tool info for frontend
 agents_store = {}
 nodes_store = {}
 graphs_store = {}
+execution_log = []  # list of {node, status, timestamp, graph}
+set_execution_log(execution_log)
 
 
 # --- Request Models ---
@@ -345,3 +348,14 @@ def telegram_status():
 @app.get("/graphs/list")
 def list_graphs():
     return {"graphs": list(graphs_store.keys())}
+
+
+# ── Execution Tracking ──────────────────────────────────
+@app.get("/execution/status")
+def execution_status():
+    return {"log": execution_log[-30:]}  # last 30 events
+
+@app.post("/execution/clear")
+def execution_clear():
+    execution_log.clear()
+    return {"message": "Execution log cleared."}

@@ -133,6 +133,14 @@ class NodeFactory:
 
 
 # --- Graph Builder ---
+# Global execution log reference — set by backend_api.py
+_execution_log = None
+
+def set_execution_log(log_list):
+    global _execution_log
+    _execution_log = log_list
+
+
 class GraphBuilder:
     def __init__(self, state: type = AgentState):
         self.state = state
@@ -159,10 +167,27 @@ class GraphBuilder:
     def add_conditional_edge(self, from_node: str, router_fn: callable, destination_map: dict):
         self.conditional_edges.append((from_node, router_fn, destination_map))
 
+    def _wrap_with_tracking(self, name, fn):
+        """Wrap a node function to log execution start/end."""
+        def tracked_fn(state):
+            from datetime import datetime
+            if _execution_log is not None:
+                _execution_log.append({"node": name, "status": "running", "timestamp": datetime.now().isoformat()})
+            try:
+                result = fn(state)
+                if _execution_log is not None:
+                    _execution_log.append({"node": name, "status": "done", "timestamp": datetime.now().isoformat()})
+                return result
+            except Exception as e:
+                if _execution_log is not None:
+                    _execution_log.append({"node": name, "status": "error", "timestamp": datetime.now().isoformat(), "error": str(e)})
+                raise
+        return tracked_fn
+
     def compile(self):
         graph = StateGraph(self.state)
         for name, fn in self.nodes:
-            graph.add_node(name, fn)
+            graph.add_node(name, self._wrap_with_tracking(name, fn))
         # Check if any conditional edge starts from START
         has_start_conditional = any(f == "__start__" or f == "START" for f, _, _ in self.conditional_edges)
         if self.entry_point and not has_start_conditional:
