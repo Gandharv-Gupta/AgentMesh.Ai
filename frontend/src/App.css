@@ -560,3 +560,55 @@ body {
   0% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), 0 0 30px rgba(245, 158, 11, 0.2); }
   100% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.7), 0 0 50px rgba(245, 158, 11, 0.4); }
 }
+
+/* ── Condition Detail Panel ────────────── */
+.condition-map {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: #0f0f1a;
+  border-radius: 8px;
+  border: 1px solid #2d2d44;
+}
+
+.condition-map-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.condition-key {
+  background: #6366f1;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.condition-arrow {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+.condition-val {
+  color: #c4b5fd;
+  font-size: 0.75rem;
+}
+
+.condition-code {
+  background: #0f0f1a;
+  border: 1px solid #2d2d44;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.7rem;
+  color: #a5b4fc;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+  line-height: 1.5;
+}

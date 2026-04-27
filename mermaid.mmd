@@ -1,0 +1,76 @@
+classDiagram
+    direction TB
+    note "AgentMesh — Core Class Architecture"
+
+    class ToolFactory {
+        +String name
+        +String description
+        +String tool_type
+        +Callable func
+        +String prompt_template
+        +create() Tool
+    }
+    note for ToolFactory "tool_type: code or llm\ncode → wraps lambda/def\nllm → ChatOpenAI + prompt_template"
+
+    class StateFactory {
+        +Dict fields
+        +create() TypedDict
+    }
+    note for StateFactory "Always includes messages\nExtends BaseAgentState\nCustom fields: context, score, etc."
+
+    class AgentState {
+        +List~BaseMessage~ messages
+    }
+
+    class Agent {
+        +String name
+        +String description
+        +List tools
+        +ChatOpenAI llm
+        +Type state
+        +invoke(user_input) Dict
+    }
+
+    class NodeFactory {
+        +String name
+        +Callable node_fn
+        +get() Tuple
+    }
+    note for NodeFactory "Wraps Agent or plain function\nReturns (name, node_fn) pair"
+
+    class GraphBuilder {
+        +Type state
+        +List nodes
+        +List edges
+        +List conditional_edges
+        +String entry_point
+        +List end_nodes
+        +add_node(NodeFactory)
+        +set_entry(String)
+        +set_end(String)
+        +add_edge(String, String)
+        +add_conditional_edge(String, Callable, Dict)
+        +compile() CompiledGraph
+        +run(String, Dict, List) Dict
+    }
+
+    class CompiledGraph {
+        +invoke(state) Dict
+    }
+
+    class ConditionalEdge {
+        +String from_node
+        +Callable router_fn
+        +Dict destination_map
+    }
+    note for ConditionalEdge "Router inspects state\nReturns key from destination_map\nRoutes to next node or END"
+
+    %% Relationships
+    ToolFactory --> Agent : "creates tools for"
+    StateFactory --> AgentState : "generates"
+    AgentState --> Agent : "used as state_schema"
+    Agent --> NodeFactory : "wrapped by"
+    NodeFactory --> GraphBuilder : "added to"
+    AgentState --> GraphBuilder : "defines state"
+    ConditionalEdge --> GraphBuilder : "registered in"
+    GraphBuilder --> CompiledGraph : "compile()"

@@ -16,6 +16,7 @@ import RunPanel from "./RunPanel";
 import DetailPanel from "./DetailPanel";
 import ToolDetailPanel from "./ToolDetailPanel";
 import ExecutionPanel from "./ExecutionPanel";
+import ConditionDetailPanel from "./ConditionDetailPanel";
 import { api } from "./api";
 import "./App.css";
 
@@ -25,6 +26,7 @@ export default function App() {
   const [graphName, setGraphName] = useState("workflow");
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedTool, setSelectedTool] = useState(null);
+  const [selectedEdge, setSelectedEdge] = useState(null);
   const [activeNode, setActiveNode] = useState(null);
 
   const onConnect = useCallback(
@@ -63,7 +65,7 @@ export default function App() {
   );
 
   const addConditionalEdge = useCallback(
-    (fromNode, toNodes) => {
+    (fromNode, toNodes, meta = {}) => {
       toNodes.forEach((to, i) => {
         const newEdge = {
           id: `cond-${fromNode}-${to}-${Date.now()}-${i}`,
@@ -72,7 +74,8 @@ export default function App() {
           animated: true,
           style: { stroke: "#f59e0b", strokeDasharray: "5 5" },
           label: "conditional",
-          labelStyle: { fill: "#f59e0b", fontSize: 10 },
+          labelStyle: { fill: "#f59e0b", fontSize: 10, cursor: "pointer" },
+          data: { fromNode, routerCode: meta.routerCode || "", destinationMap: meta.destinationMap || {} },
         };
         setEdges((eds) => [...eds, newEdge]);
       });
@@ -94,15 +97,25 @@ export default function App() {
     return isActive ? { ...n, className: "node-active" } : n;
   });
 
+  const onEdgeClick = useCallback((event, edge) => {
+    if (edge.data && edge.data.routerCode) {
+      setSelectedEdge(edge);
+      setSelectedNode(null);
+      setSelectedTool(null);
+    }
+  }, []);
+
   const onNodeClick = useCallback((event, node) => {
     if (node.type === "startNode" || node.type === "endNode") return;
     setSelectedNode(node);
     setSelectedTool(null);
+    setSelectedEdge(null);
   }, []);
 
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
     setSelectedTool(null);
+    setSelectedEdge(null);
   }, []);
 
   const onUpdateNode = useCallback(
@@ -137,6 +150,7 @@ export default function App() {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
           fitView
@@ -164,6 +178,9 @@ export default function App() {
             agentName={selectedTool.agentName}
             onClose={() => setSelectedTool(null)}
           />
+        )}
+        {selectedEdge && (
+          <ConditionDetailPanel edge={selectedEdge} onClose={() => setSelectedEdge(null)} />
         )}
         <RunPanel graphName={graphName} />
         <ExecutionPanel onActiveNodeChange={setActiveNode} />

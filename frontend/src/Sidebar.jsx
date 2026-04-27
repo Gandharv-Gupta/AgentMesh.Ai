@@ -128,7 +128,7 @@ export default function Sidebar({ onNodeAdd, graphName, setGraphName, refreshLis
       showStatus(`Conditional edge added from '${condFrom}'`);
       // Draw conditional edges on canvas
       const toNodes = Object.values(destination_map).map(v => v === "END" ? "__end__" : v);
-      if (toNodes.length > 0) addConditionalEdge(condFrom, toNodes);
+      if (toNodes.length > 0) addConditionalEdge(condFrom, toNodes, { routerCode, destinationMap: destination_map });
       setCondFrom(""); setRouterCode(""); setDestMap("");
     } catch (e) { showStatus(`Error: ${e.message}`); }
   };
@@ -217,7 +217,7 @@ export default function Sidebar({ onNodeAdd, graphName, setGraphName, refreshLis
           await api.setEnd("flight_booking", "flight_search");
           await api.setEnd("flight_booking", "booking_agent");
 
-          addConditionalEdge("info_collector", ["flight_search", "booking_agent"]);
+          addConditionalEdge("info_collector", ["flight_search", "booking_agent"], { routerCode, destinationMap: { collect: "info_collector", search: "flight_search", book: "booking_agent", done: "END" } });
 
           showStatus("✅ Demo loaded! Connect to Telegram to test.");
         } catch (e) { showStatus(`Error: ${e.message}`); }
