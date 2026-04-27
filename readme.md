@@ -10,7 +10,6 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Orchestration-FF6F00)](https://github.com/langchain-ai/langgraph)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
 
