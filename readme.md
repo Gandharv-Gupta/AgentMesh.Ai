@@ -218,9 +218,9 @@ AgentMesh/
 
 ---
 
-## 🛠️ Build Your Own Flow
+## 🛠️ Building Own Flow
 
-You don't need the demo — create any agent workflow:
+Create any agent workflow:
 
 1. **Create Tools** — Code tools (`lambda q: ...`) or LLM tools (prompt templates)
 2. **Create Agents** — Assign tools and write a system prompt
@@ -247,7 +247,7 @@ Conditional edges accept a Python `def router(state):` function that reads `stat
 
 ## 📄 License
 
-MIT
+All Rights Reserved
 
 ---
 
